@@ -1,0 +1,40 @@
+<html>
+    <meta name="google-signin-client_id" content="1035122774016-dlo432n6cs2i7s09ndaf5q6q349rjmiq.apps.googleusercontent.com">
+  
+    <!-- jQuery -->
+    <script src="/admin-lte-3/plugins/jquery/jquery.min.js"></script>
+    <body>
+        <div  style='width: 100%; margin-top: 20%; margin-left: 40%;'>
+            <div id='btn-logout' style='cursor: pointer;width: 238px; height: 40px; border: solid 1px #ccc; line-height: 40px; text-align: center' onclick="signOut();">Sign out</div>
+
+        </div>
+        
+    </body>
+
+    <script>
+
+        $(document).ready(function(){
+            //$("#btn-logout").hide();
+            //signOut();
+            setTimeout(function(){ 
+                signOut();
+            }, 1000)
+        });
+
+        function onLoad() {
+            gapi.load('auth2', function() {
+                gapi.auth2.init();
+            });
+        }
+
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+                location = "/";
+            });
+        }
+    </script>
+  <script src="https://apis.google.com/js/platform.js?onload=onLoad" async defer></script>
+</html>

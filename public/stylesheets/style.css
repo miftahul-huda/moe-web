@@ -1,0 +1,55 @@
+td {
+  font-size: 10pt;
+}
+
+span {
+  font-size: 10pt;
+}
+
+div {
+  font-size: 10pt;
+}
+
+#tblStudent {
+  border-collapse: collapse;
+  border-radius: 10em;
+  overflow: hidden;
+}
+
+#tblStudent th, #tblStudent td {
+  padding: 1em;
+  background: #eee;
+  border-bottom: 2px solid white; 
+}
+
+
+a {
+  color: #00B7FF;
+}
+
+.btn-primary {
+  background-color: #14325C;
+  border: 0px solid;
+}
+
+.btn-primary:hover {
+  background-color: #49688f;
+  border: 0px solid;
+}
+
+.btn-primary:not( :hover ) {
+  background-color: #49688f;
+  border: 0px solid;
+}
+
+.btn-primary:active {
+  background-color: #49688f;
+  border: 0px solid;
+}
+
+
+.select2-container--default .select2-results__option--highlighted[aria-selected], .select2-container--default .select2-results__option--highlighted[aria-selected]:hover {
+  background-color: #F2F2F2;
+  color: #fff;
+}
+

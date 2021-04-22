@@ -1,0 +1,69 @@
+<html>
+    <meta name="google-signin-client_id" content="1035122774016-dlo432n6cs2i7s09ndaf5q6q349rjmiq.apps.googleusercontent.com">
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <!-- jQuery -->
+    <script src="/admin-lte-3/plugins/jquery/jquery.min.js"></script>
+    <body>
+        <div  style='width: 100%; margin-top: 20%; margin-left: 40%;'>
+
+            <div style="font-size: 15; padding-bottom: 5%; font-weight: bold; font-family: Roboto; margin-left: -1%;">Sign in to Node Simple Note Application</div>
+
+            <div id="my-signin2"></div>
+            <div style="height: 10;"></div>
+            <div id='btn-logout' style='display: none; cursor: pointer;width: 238px; height: 40px; border: solid 1px #ccc; line-height: 40px; text-align: center' onclick="signOut();">Sign out</div>
+
+        </div>
+        
+    </body>
+
+    <script>
+
+        $(document).ready(function(){
+            $("#btn-logout").hide();
+        });
+
+        function onSuccess(googleUser) {
+
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+            $("#btn-logout").show();
+            $("#my-signin2").hide();
+
+
+            var urlparam = "id=" + profile.getId() + "&name=" + encodeURIComponent(profile.getName()) + "&email=" + profile.getEmail() + "&photo=" + profile.getImageUrl();
+            location = "/web/loggedin?" + urlparam;
+
+        }
+
+        function onFailure(error) {
+            console.log(error);
+        }
+
+        function renderButton() {
+
+            gapi.signin2.render('my-signin2', {
+                'scope': 'profile email',
+                'width': 240,
+                'height': 50,
+                'longtitle': true,
+                'theme': 'dark',
+                'onsuccess': onSuccess,
+                'onfailure': onFailure
+            });
+        }
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+                console.log('User signed out.');
+                $("#btn-logout").hide();
+                $("#my-signin2").show();
+            });
+        }
+    </script>
+     <script src="https://apis.google.com/js/platform.js?onload=renderButton" async defer></script>
+</html>

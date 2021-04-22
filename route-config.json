@@ -1,0 +1,4 @@
+[
+    { "path" :  "/web", "router"  : "./routes/web" },
+    { "path" :  "/logger", "router"  : "./routes/logger" }
+]

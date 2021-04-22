@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<%- include ("./headerscript.html") -%>
+</head>
+<body>
+<%- include ("./header.html") -%>
+
+    <div class="card-body">
+        <div class="position-relative form-group" style="display: flex;">
+            <div class="form-group" style="width: 40%;">
+                <label style="font-weight: bold;">Application</label>
+                <select id="application" class="form-control select2" style="width: 100%;">
+                </select>
+            </div>
+            <div style="width: 5%"></div>
+            <div class="form-group" style="width: 40%;">
+                <label style="font-weight: bold;">Type</label>
+                <select id="type" class="form-control select2" style="width: 100%;">
+                </select>
+            </div>
+        </div>
+        <table id="datatable"></table>
+
+    </div>
+
+<%- include ("./footer.html") -%>
+</body>
+
+<script>
+$(document).ready(function(){
+    loadLoggers(function(){
+        loadApplications(function(){
+            loadLoggerTypes();
+        })
+    });
+    $("#application").on("change", function(e){
+        loadLoggers();
+    });
+    $("#type").on("change", function(e){
+        loadLoggers();
+    });
+})
+
+function loadApplications(callback)
+{
+    var url = "/logger/apps";
+    $.get(url, function(response){   
+        let apps = response.payload;
+        console.log("loggerapps");
+        console.log(apps);
+        displayApplications(apps);
+        if(callback != null)
+            callback(apps);
+    }); 
+}
+
+function loadLoggerTypes(callback)
+{
+    var url = "/logger/types";
+    $.get(url, function(response){   
+        let types = response.payload;
+        displayLogTypes(types);
+        if(callback != null)
+            callback(types);
+    }); 
+}
+
+function displayApplications(apps)
+{
+    $("#application").html("");
+    $("#application").append("<option value='*'>All</option>")
+    apps.map(function(item){
+        $("#application").append("<option value='" + item.logApplication + "'>" + item.logApplication + "</option>")
+    });
+}
+
+function displayLogTypes(types)
+{
+    $("#type").html("");
+    $("#type").append("<option value='*'>All</option>")
+    types.map(function(item){
+        $("#type").append("<option value='" + item.logType + "'>" + item.logType + "</option>")
+    });
+}
+
+function base64decode(s)
+{
+    let ss = s;
+    try{
+        ss = atob(s);
+    }
+    catch(e)
+    {
+
+    }
+    
+    return ss;
+}
+
+var table = null;
+function loadLoggers(callback)
+{
+    var url = "/logger";
+
+    var appname = $("#application").val();
+    var type = $("#type").val();
+
+    if(appname != "*" && appname != null)
+        url += "/app/" + appname;
+    
+    if(type != "*" && type != null)
+        url += "/type/" + type;
+
+    console.log(url);
+    $.get(url, function(response){
+        if(response.success)
+        {
+            var loggers = response.payload;
+            console.log(loggers)
+            //loggers.reverse();
+
+            for(var i=0; i < loggers.length; i++)
+            {
+                loggers[i].logModule = base64decode(loggers[i].logModule);
+                loggers[i].logContent = base64decode(loggers[i].logContent);
+                loggers[i].delete = "<div style='cursor: pointer' onclick='deleteLoggers(" + loggers[i].id + ")'>x</div>"
+            }
+
+            if(table != null)
+                table.destroy();
+
+            table = $("#datatable").DataTable({
+                data: loggers,
+                columns: [
+                    { title: "Date", data:"logDate"},
+                    { title: "Application", data: "logApplication"},
+                    { title: "Log Type", data: "logType"},
+                    { title: "Module", data: "logModule"},
+                    { title: "Content", data: "logContent"},
+                    { title: "User", data: "username"}
+                ]
+            })
+
+            if(callback != null)
+                callback();
+
+        }
+        else{
+            alert(JSON.stringify(response));
+        }
+    });    
+}
+
+
+function deleteLoggers(i)
+{
+
+    var url = "/organization/delete/" + i;
+    $.get(url,  function(response){
+        if(response.success)
+        {
+            loadLoggers();
+        }
+        else{
+            alert(response.error);
+        }
+    });
+}
+
+</script>
+</html>
+
+
