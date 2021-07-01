@@ -10,7 +10,34 @@
     
 
     <div class="card-body">
-        <select  class="form-control select2" style="width: 100%;" id="cmbGroup"></select>
+        <div style="display: flex; width: 100%;">
+            <div style="width: 10%;padding-top: 5px;">
+                Milestone Stage
+            </div>
+            <div style="width: 90%;">
+                <select  class="form-control select2" style="width: 100%;" id="cmbGroup"></select>
+            </div>
+        </div>
+        <div style="height: 10px;"></div>
+        <div style="display: flex; width: 100%;">
+            <div style="width: 10%;padding-top: 5px;">
+                Homework
+            </div>
+            <div style="width: 90%;">
+                <select  class="form-control select2" style="width: 100%;" id="cmbHomeworks"></select>
+            </div>
+        </div>
+        <div style="height: 10px;"></div>
+        <div style="display: flex; width: 100%;">
+            <div style="width: 10%;padding-top: 5px;">
+                Status
+            </div>
+            <div style="width: 90%;">
+                <select  class="form-control select2" style="width: 100%;" id="cmbHomeworkStatuses"></select>
+            </div>
+        </div>
+        
+        
 
         <div style="padding-top: 30px">
             <table id="tblInfo" style="border: solid 1px #ccc; width: 20%; table-layout: fixed;">
@@ -30,7 +57,7 @@
         </div>
 
         <div style="padding-top: 30px">
-            <table id="tblStudent" style="border: solid 1px #ccc; width: 100%; table-layout: fixed; border-radius:5px"></table>
+            <table id="tblStudent" style="border: solid 1px #ccc; width: 100%; table-layout: fixed; border-radius:0px"></table>
         </div>
 
     </div>
@@ -42,18 +69,95 @@
 
     var HOMEWORKS = [];
     var STUDENTS = [];
-    var BASEURL = "https://moe-monday-webhook-dot-dvt-apac-playground-1.et.r.appspot.com";
+    var HOMEWORKSTATUSES = [];
+    var BASEURL = "<%=info.APIBASEURL %>";
 
     $(document).ready(function(){
+
+        getAndDisplayHomeworkStatuses(function(statuses){
+            displayHomeworkStatusesLegend(statuses);
+        });
+
+        
+        
+
         $("#cmbGroup").on("change", function( ){
+            getAndDisplayCmbHomeworks(displayTable);
+            //displayTable();
+        })
+
+        $("#cmbHomeworks").on("change", function( ){
+           
             displayTable();
         })
+
+        $("#cmbHomeworkStatuses").on("change", function( ){
+            
+            displayTable();
+        })
+
+        console.log(BASEURL + "/report/groups/by-board/" + $("#boardID").val())
         $.get(BASEURL + "/report/groups/by-board/" + $("#boardID").val(), function(response){
             console.log(response);
             displayGroups(response.payload);
+            
             $("#cmbGroup").trigger("change");
         });
     })
+
+    function getAndDisplayHomeworkStatuses(callback)
+    {
+        getHomeworkStatuses(function(statuses){
+            displayHomeworkStatuses(statuses);
+            if(callback != null)
+                callback(statuses);
+        })
+    }
+
+    function getHomeworkStatuses(callback)
+    {
+        $.get(BASEURL + "/report/homeworkstatuses", function(response){
+            console.log(response);
+            HOMEWORKSTATUSES = response.payload;
+            if(callback != null)
+                callback(response.payload)
+        });
+    }
+
+    function displayHomeworkStatuses(statuses)
+    {
+        $("#cmbHomeworkStatuses").html("");
+
+        var opt = document.createElement("option");
+        opt.value = "*";
+        $(opt).html("All");
+        $("#cmbHomeworkStatuses").append(opt);
+
+        statuses.forEach((item)=>{
+            var opt = document.createElement("option");
+            opt.value = item.homeworkStatus;
+            $(opt).html(item.homeworkStatus);
+            $("#cmbHomeworkStatuses").append(opt);
+        })
+    }   
+
+    function displayHomeworkStatusesLegend(statuses)
+    {
+        $("#tblInfo").html("");
+        statuses.forEach((item)=>{
+            var tr = document.createElement("tr");
+            var td = document.createElement("td");
+            $(td).attr("style", "background-color: " + item.color + "; border: solid 1px #ccc; text-align:center")
+            $(tr).append(td);
+
+            td = document.createElement("td");
+            $(td).attr("style", "border: solid 1px #ccc; text-align:center")
+            $(td).html(item.homeworkStatus)
+            $(tr).append(td);
+
+            $("#tblInfo").append(tr);
+        })
+    }
 
     function displayGroups(groups)
     {
@@ -67,18 +171,47 @@
         });
     }
 
+    function displayCmbHomeworks(homeworks)
+    {
+        $("#cmbHomeworks").html("");
+
+        var opt = document.createElement("option");
+        opt.value = "*";
+        $(opt).html("All");
+        $("#cmbHomeworks").append(opt);
+
+        homeworks.forEach((item)=>{
+            var opt = document.createElement("option");
+            opt.value = item.id;
+            $(opt).html(item.homeworkTitle);
+            $("#cmbHomeworks").append(opt);
+        })
+    }
+
     function displayTable()
     {
         $("#tblStudent").html("");
         getHomeworks(function(response){
             HOMEWORKS = response.payload;
+            console.log("HOMEWORKS");
+            console.log(HOMEWORKS);
+            //displayCmbHomeworks(HOMEWORKS); 
             getStudents(function(response){
                 STUDENTS = response.payload;
-                console.log(HOMEWORKS);
+                
                 displayTableHeader();
                 displayTableRows();
                 populateTable();
             })
+        })
+    }
+
+    function getAndDisplayCmbHomeworks(callback)
+    {
+        getHomeworksForCombo(function(response){
+            displayCmbHomeworks(response.payload);
+            if(callback != null)
+                callback();
         })
     }
 
@@ -91,10 +224,10 @@
                 let dueDate = $("#td_homework_" + item.homeworkId).attr("duedate");
                 let submittedDate = item.submittedDate;
                
-                if(submittedDate != null)
-                    $("#" + id).html(moment(submittedDate).format("MMM DD, YYYY"));
+                //if(submittedDate != null)
+                //    $("#" + id).html(moment(submittedDate).format("MMM DD, YYYY"));
 
-                dueDate = new Date(JSON.parse(dueDate).text);
+                //dueDate = new Date(JSON.parse(dueDate).text);
                 submittedDate = new Date(submittedDate);
 
 
@@ -103,6 +236,20 @@
 
                 console.log(submittedDate + " - " + dueDate)
 
+                let bgColor = "#fff";
+                HOMEWORKSTATUSES.forEach((hmitem)=>
+                {
+                    console.log(hmitem.homeworkStatus + "===" + item.homeworkStatus)
+                    if(item.homeworkStatus != null && hmitem.homeworkStatus.replace(/ /g, '').toLowerCase() == item.homeworkStatus.replace(/ /g, '').toLowerCase())
+                    {
+                        bgColor = hmitem.color;
+                        console.log(bgColor)
+                    }
+                })
+
+                $("#" + id).attr("style", "background-color: " + bgColor + "; border: solid 1px #ccc; color: #fff")
+
+                /*
                 //Green
                 if(item.homeworkStatus != null && item.homeworkStatus.toLowerCase() == "done" && submittedDate <= dueDate)
                 {
@@ -120,6 +267,8 @@
                 {
                     $("#" + id).attr("style", "background-color: #E2445C; border: solid 1px #ccc; color: #fff")
                 }
+
+                */
 
             });
         })       
@@ -170,9 +319,22 @@
         
     }
 
-    function getHomeworks(callback)
+    function getHomeworksForCombo(callback)
     {
         var url = BASEURL + "/report/homeworks/by-board-and-group/" + $("#boardID").val() + "/" + $("#cmbGroup").val();
+        console.log("getHomeworksForCombo")
+        console.log(url);
+        $.get(url, function(response){
+            console.log(response);
+            if(callback != null)
+                callback(response);
+        });
+    }
+
+    function getHomeworks(callback)
+    {
+        var url = BASEURL + "/report/homeworks/by-board-group-homework-status/" + $("#boardID").val() + "/" + $("#cmbGroup").val() + "/" + $("#cmbHomeworks").val() + "/" + $("#cmbHomeworkStatuses").val();
+        console.log("getHomeworks")
         console.log(url);
         $.get(url, function(response){
             console.log(response);
@@ -183,7 +345,7 @@
 
     function getHomeworkStudents(callback)
     {
-        $.get(BASEURL + "/report/homeworkstudents/by-board-and-group/" + $("#boardID").val() + "/" + $("#cmbGroup").val(), function(response){
+        $.get(BASEURL + "/report/homeworkstudents/by-board-and-group/" + $("#boardID").val() + "/" + $("#cmbGroup").val() , function(response){
             console.log(response);
             if(callback != null)
                 callback(response);
@@ -197,7 +359,10 @@
 
     function getStudents(callback)
     {
-        $.get(BASEURL + "/report/students/by-board-and-group/" + $("#boardID").val() + "/" + $("#cmbGroup").val(), function(response){
+        var url = BASEURL + "/report/students/by-board-group-homework-status/" + $("#boardID").val() + "/" + $("#cmbGroup").val() + "/" + $("#cmbHomeworks").val() + "/" + $("#cmbHomeworkStatuses").val();
+        console.log('getStudents')
+        console.log(url)
+        $.get(url, function(response){
             console.log(response);
             if(callback != null)
                 callback(response);

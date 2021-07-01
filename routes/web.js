@@ -8,7 +8,7 @@ router.get('/:boardID', function (req, res){
     let boardID = req.params.boardID;
     var dir = __dirname;
     var p = path.resolve( dir, "../public/pages/", "dashboard");
-    res.render(p, { info: { boardID: boardID } } )
+    res.render(p, { info: { boardID: boardID, APIBASEURL: process.env.APIBASEURL } } )
 
 })
 

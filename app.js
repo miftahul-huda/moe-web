@@ -42,7 +42,7 @@ app.use(session({
     dataset: new Datastore(),
     kind: 'express-sessions',
   }),
-  secret: 'authentication',saveUninitialized: true,resave: false}));
+  secret: 'moeweb',saveUninitialized: true,resave: false}));
 
 //Dynamic routing based on configuration
 const fs = require('fs');
